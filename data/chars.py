@@ -3,6 +3,7 @@ class CharDict:
     PUNCTUATION_REPLACEMENT_DICT = {'_' : ' ',
                                     '#' : '',
                                     u'\xa0' : u' ',
+                                    '–' : '-',
                                }     ## Incomplete
     LETTER_REPLACEMENTS_DICT = {'á' : 'a',
                                 'à' : 'a',
@@ -16,6 +17,8 @@ class CharDict:
                                 'å' : 'a',
                                 'é' : 'e',
                                 'è' : 'e',
+                                'ë' : 'e',
+                                'ė' : 'e',
                                 'É' : 'E',
                                 'ò' : 'o',
                                 'ó' : 'o',
@@ -23,6 +26,7 @@ class CharDict:
                                 'ō' : 'o',
                                 'ù' : 'u',
                                 'ú' : 'u',
+                                'ū' : 'u',
                                 'ý' : 'y',
                                 'ç' : 'c',
                                 'Ç' : 'C',
@@ -40,4 +44,5 @@ class CharDict:
                                 'Ü' : 'U',
                                 'Т' : 'T',
                                 'œ' : 'oe',
+                                'ł' : 'l',
                                 }          ## Incomplete
