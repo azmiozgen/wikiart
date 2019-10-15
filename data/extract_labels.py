@@ -34,6 +34,12 @@ def remove_duplicates(seq):
     seen_add = seen.add
     return [x for x in seq if not (x in seen or seen_add(x))]
 
+def flatten(_iterable):
+    if isinstance(_iterable, list):
+        return [a for i in _iterable for a in flatten(i)]
+    else:
+        return [_iterable]
+
 def split_scriptiocontinua(s):
     lookup_result = lookup_dictionary(s)
     if lookup_result == 1:
@@ -86,10 +92,17 @@ def extract_words(s, delimiter='@@@'):
 
 if __name__ == "__main__":
 
-    IMAGES_DIR = './images/'
-    OUTPUT_TAGS_FILE = './tags.txt'
+    IMAGES_DIR = "./images/"
+    INPUT_METADATA_FILE = "./metadata.txt"
+    OUTPUT_LABELS_FILE = "./labels.txt"
+    DELIMITER = ','
 
-    labels_df = pd.read_csv("metadata.txt", delimiter='|')
+    if os.path.isfile(OUTPUT_LABELS_FILE):
+        print(OUTPUT_LABELS_FILE, 'exists. Exiting.')
+        exit()
+
+    ## Read metadata file
+    labels_df = pd.read_csv(INPUT_METADATA_FILE, delimiter='|')
     labels_df = labels_df.replace(np.nan, '', regex=True)
     n_paintings = len(labels_df.index)
 
@@ -102,52 +115,56 @@ if __name__ == "__main__":
             print("{} is not found".format(image_file))
             continue
 
-        print("{}/{}".format(i + 1, n_paintings))
+        # print("{}/{}".format(i + 1, n_paintings))
         labels = []
 
         ## Location
         if location:
+            location_org = location
             location = location.strip()
             location = replace_chars(location)
             location = location.lower()
             if location in WordDict.EXCLUDING_WORDS:
-                location = "<REMOVED>"
+                labels.append(location)
             elif location in WordDict.INCLUDING_WORDS:
-                pass
+                labels.append(location)
             elif location in WordDict.MAPPING_WORDS:
                 location = WordDict.MAPPING_WORDS[location]
+                labels.extend(location)
             else:
                 locations = extract_words(location)
-                location = " ".join(locations)
+                location = locations
                 labels.extend(location)
-            print("\tLocation:", location)
+            # print("\tLocation:", location_org, "-->", location)
 
         ## Serie
         if serie:
+            serie_org = serie
             serie = replace_chars(serie)
             serie = serie.lower()
             if serie in WordDict.EXCLUDING_WORDS:
-                serie = "<REMOVED>"
+                labels.append(serie)
             elif serie in WordDict.INCLUDING_WORDS:
-                pass
+                labels.append(serie)
             elif serie in WordDict.MAPPING_WORDS:
                 serie = WordDict.MAPPING_WORDS[serie]
+                labels.extend(serie)
             else:
                 series = extract_words(serie)
                 serie = series
                 labels.extend(serie)
-            print("\tSerie:", serie)
+            # print("\tSerie:", serie_org, "-->", serie)
 
         ## Genre
         if genres:
+            genres_org = genres
             genres = replace_chars(genres)
             genres = genres.lower()
             genres_now = []
             for genre in genres.split(','):
                 genre = genre.strip()
                 if genre in WordDict.EXCLUDING_WORDS:
-                    genre = "<REMOVED>"
-                    genres_now.append(genre)
+                    continue
                 elif genre in WordDict.INCLUDING_WORDS:
                     genres_now.append(genre)
                 elif genre in WordDict.MAPPING_WORDS:
@@ -157,19 +174,19 @@ if __name__ == "__main__":
                     genres = extract_words(genre)
                     genre = " ".join(genres)
                     genres_now.append(genre)
-            print("\tGenres:", genres_now)
+            # print("\tGenres:", genres_org, "-->", genres_now)
             labels.extend(genres_now)
 
         ## Style
         if styles:
+            styles_org = styles
             styles = replace_chars(styles)
             styles = styles.lower()
             styles_now = []
             for style in styles.split(','):
                 style = style.strip()
                 if style in WordDict.EXCLUDING_WORDS:
-                    style = "<REMOVED>"
-                    styles_now.append(style)
+                    continue
                 elif style in WordDict.INCLUDING_WORDS:
                     styles_now.append(style)
                 elif style in WordDict.MAPPING_WORDS:
@@ -179,21 +196,19 @@ if __name__ == "__main__":
                     styles = extract_words(style)
                     style = " ".join(styles)
                     styles_now.append(style)
-            print("\tStyles:", styles_now)
+            # print("\tStyles:", styles_org, "-->", styles_now)
             labels.extend(styles_now)
 
         ## Tags
         if tags:
+            tags_org = tags
             tags = replace_chars(tags)
             tags = tags.lower()
-            tags_org = tags
             tags_now = []
             for tag in tags.split(','):
-
                 tag = tag.strip()
-
                 if tag in WordDict.EXCLUDING_WORDS:
-                    pass
+                    continue
                 elif tag in WordDict.INCLUDING_WORDS:
                     tags_now.append(tag)
                 elif tag in WordDict.MAPPING_WORDS:
@@ -215,8 +230,16 @@ if __name__ == "__main__":
                     else:
                         tag = tag.replace('-', ' ')
                     tags_now.append(tag)
-            print("\tTags:", tags_now)
+            # print("\tTags:", tags_org, "-->", tags_now)
             labels.extend(tags_now)
 
         # print('\t\tLabels:', labels)
-        print("------")
+        # print("------")
+        labels = flatten(labels)
+        row_str = filename + DELIMITER
+        for label in labels:
+            row_str += label + DELIMITER
+        row_str = row_str.strip().strip(DELIMITER) + '\n'
+        # print(row_str)
+        with open(OUTPUT_LABELS_FILE, 'a') as f:
+            f.write(row_str)
