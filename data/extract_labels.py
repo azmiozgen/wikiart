@@ -133,6 +133,7 @@ if __name__ == "__main__":
                 labels.extend(location)
             else:
                 locations = extract_words(location)
+                locations = list(map(handle_numerals, locations))
                 location = locations
                 labels.extend(location)
             # print("\tLocation:", location_org, "-->", location)
@@ -151,6 +152,7 @@ if __name__ == "__main__":
                 labels.extend(serie)
             else:
                 series = extract_words(serie)
+                series = list(map(handle_numerals, series))
                 serie = series
                 labels.extend(serie)
             # print("\tSerie:", serie_org, "-->", serie)
@@ -172,6 +174,7 @@ if __name__ == "__main__":
                     genres_now.extend(genre)
                 else:
                     genres = extract_words(genre)
+                    genres = list(map(handle_numerals, genres))
                     genre = " ".join(genres)
                     genres_now.append(genre)
             # print("\tGenres:", genres_org, "-->", genres_now)
@@ -194,6 +197,7 @@ if __name__ == "__main__":
                     styles_now.extend(style)
                 else:
                     styles = extract_words(style)
+                    styles = list(map(handle_numerals, styles))
                     style = " ".join(styles)
                     styles_now.append(style)
             # print("\tStyles:", styles_org, "-->", styles_now)
@@ -215,6 +219,7 @@ if __name__ == "__main__":
                     tag = WordDict.MAPPING_WORDS[tag]
                     tags_now.extend(tag)
                 else:
+                    tag = handle_numerals(tag)
                     if '"' in tag:
                         parts = []
                         for i in tag.split('"'):
